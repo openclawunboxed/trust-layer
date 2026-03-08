@@ -9,6 +9,9 @@ use this when the workflow stops and passes control to a human.
 - timestamp:
 - owner:
 - risk tier:
+- trust boundary:
+- environment:
+- approval status:
 
 ## what happened
 
@@ -43,11 +46,20 @@ what should happen immediately after the decision?
 - source link:
 - source link:
 
+## policy basis
+
+- relevant contract rule:
+- relevant firewall rule:
+
 ## blocked or approval-required actions
 
 - 
 - 
 - 
+
+## safer alternative
+
+what lower-risk path is available right now?
 
 ## notes for reviewer
 
