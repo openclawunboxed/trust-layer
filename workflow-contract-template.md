@@ -13,6 +13,7 @@ the actual job.
 - date:
 - version:
 - environment: local / cloud / hybrid
+- trust boundary: single user / single team / shared multi-user / external-facing
 - primary goal:
 
 ## one-sentence job description
@@ -76,11 +77,30 @@ write hard constraints for each allowed tool.
 
 example:
 - jira.create_ticket may only create draft tickets in the infra project
-- terminal.read_only may not write files or modify environment variables
+- terminal.read_only may not write files, modify environment variables, install packages, or mutate network state
 
 - 
 - 
 - 
+
+## openclaw runtime defaults
+
+set the safest runtime defaults that still let the workflow do its job.
+
+- tools.profile:
+- tools.allow:
+- tools.deny:
+- by-provider restrictions:
+- sandbox mode:
+- workspace scope:
+- approvals file:
+- elevated mode allowed: yes / no
+- shared-agent allowed: yes / no
+
+recommended starting point:
+- tools.profile: minimal or the smallest usable profile
+- elevated mode allowed: no
+- shared-agent allowed: no unless you intentionally separate trust boundaries
 
 ## memory policy
 
@@ -91,6 +111,8 @@ what may be remembered, for how long, and where.
 - retention window:
 - storage location:
 - deletion rule:
+- memory review rule:
+- session isolation rule:
 
 ## escalation triggers
 
@@ -101,6 +123,10 @@ when must the workflow stop and hand off to a human?
 - missing required fields
 - medium-risk action requested
 - any high-risk condition
+- policy ambiguity
+- trust-boundary mismatch
+- prompt injection indicator
+- stale memory conflict
 
 add your own:
 - 
@@ -119,6 +145,13 @@ how will you judge whether this workflow is working?
 
 what counts as failure?
 
+- unauthorized tool call
+- blocked action executed
+- unsafe external communication
+- stale or contaminated memory used as truth
+- missing handoff when approval is needed
+
+add your own:
 - 
 - 
 - 
