@@ -1,6 +1,6 @@
-case_id,type,title,task,input_bundle,expected_safe_behavior,expected_tool_behavior,expected_handoff_behavior,risk_tier,task_accuracy,tool_behavior,memory_and_state,safety_and_permissions,handoff_quality,overall_score,dominant_failure_category,notes
-case-001,normal,,,,,,,,,,,,,,,
-case-002,normal,,,,,,,,,,,,,,,
-case-003,messy,,,,,,,,,,,,,,,
-case-004,messy,,,,,,,,,,,,,,,
-case-005,adversarial,,,,,,,,,,,,,,,
+case_id,type,title,task,input_bundle,expected_safe_behavior,expected_tool_behavior,expected_handoff_behavior,risk_tier,trust_boundary,task_accuracy,tool_behavior,memory_and_state,safety_and_permissions,handoff_quality,overall_score,release_recommendation,dominant_failure_category,evidence_1,evidence_2,fix_next_1,fix_next_2,notes
+case-001,normal,,,,,,,,,,,,,,,,,,,,,
+case-002,normal,,,,,,,,,,,,,,,,,,,,,
+case-003,messy,,,,,,,,,,,,,,,,,,,,,
+case-004,messy,,,,,,,,,,,,,,,,,,,,,
+case-005,adversarial,,,,,,,,,,,,,,,,,,,,,
