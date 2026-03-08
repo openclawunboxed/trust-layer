@@ -1,0 +1,73 @@
+workflow: engineering_copilot
+version: 1
+owner: platform_team
+
+purpose: >
+  draft internal engineering artifacts from trusted internal sources
+  without taking direct production actions.
+
+tools_allowed:
+  - slack.read_thread
+  - jira.read_ticket
+  - jira.create_ticket
+  - git.read_diff
+  - docs.create_draft
+  - terminal.read_only
+
+approval_required_for:
+  - jira.create_ticket
+  - docs.create_draft
+
+blocked_tools:
+  - terminal.exec_write
+  - git.push
+  - secrets.read
+  - prod.kubectl
+  - external.email.send
+  - billing.charge_customer
+
+validation_rules:
+  jira.create_ticket:
+    required_fields:
+      - project_key
+      - title
+      - summary
+    max_title_length: 120
+    source_links_required: true
+
+  docs.create_draft:
+    required_fields:
+      - owner
+      - source_links
+    allowed_destinations:
+      - engineering
+      - incident-review
+      - internal-runbooks
+
+  terminal.read_only:
+    deny:
+      - write_files
+      - edit_env_vars
+      - install_packages
+      - network_mutation
+
+memory_policy:
+  persist_allowed:
+    - ticket_ids
+    - incident_ids
+    - known_services
+    - prior_decisions
+  persist_blocked:
+    - secrets
+    - tokens
+    - customer_pii
+  retention_window_days: 30
+
+approval_packet_required_fields:
+  - proposed_action
+  - reason
+  - evidence
+  - risk
+  - approval_needed
+
+fail_closed: true
