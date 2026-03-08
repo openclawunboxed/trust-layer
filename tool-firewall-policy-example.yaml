@@ -1,10 +1,39 @@
 workflow: engineering_copilot
-version: 1
+version: 2
 owner: platform_team
 
 purpose: >
   draft internal engineering artifacts from trusted internal sources
   without taking direct production actions.
+
+trust_boundary:
+  mode: single_team
+  shared_agent_allowed: false
+  notes: >
+    if multiple trust boundaries exist, use separate gateways, separate OS users,
+    or separate hosts.
+
+openclaw_runtime_defaults:
+  tools_profile: minimal
+  tools_allow:
+    - slack.read_thread
+    - jira.read_ticket
+    - jira.create_ticket
+    - git.read_diff
+    - docs.create_draft
+    - terminal.read_only
+  tools_deny:
+    - group:runtime
+    - terminal.exec_write
+    - git.push
+    - secrets.read
+    - prod.kubectl
+    - external.email.send
+    - billing.charge_customer
+  sandbox_required: true
+  workspace_scoped_fs: true
+  elevated_allowed: false
+  approvals_required: true
 
 tools_allowed:
   - slack.read_thread
@@ -19,6 +48,7 @@ approval_required_for:
   - docs.create_draft
 
 blocked_tools:
+  - group:runtime
   - terminal.exec_write
   - git.push
   - secrets.read
@@ -27,22 +57,34 @@ blocked_tools:
   - billing.charge_customer
 
 validation_rules:
+  slack.read_thread:
+    required_fields:
+      - thread_id
+
+  jira.read_ticket:
+    required_fields:
+      - ticket_id
+
   jira.create_ticket:
     required_fields:
       - project_key
       - title
       - summary
+      - source_links
     max_title_length: 120
-    source_links_required: true
+    only_create_as_draft: true
+    require_approval_packet: true
 
   docs.create_draft:
     required_fields:
       - owner
       - source_links
+      - destination
     allowed_destinations:
       - engineering
       - incident-review
       - internal-runbooks
+    require_approval_packet: true
 
   terminal.read_only:
     deny:
@@ -50,6 +92,8 @@ validation_rules:
       - edit_env_vars
       - install_packages
       - network_mutation
+      - exec_shell
+      - elevated
 
 memory_policy:
   persist_allowed:
@@ -61,13 +105,21 @@ memory_policy:
     - secrets
     - tokens
     - customer_pii
+    - raw_untrusted_instructions
   retention_window_days: 30
+  require_sanitization_before_persist: true
+  require_session_isolation: true
 
 approval_packet_required_fields:
   - proposed_action
+  - decision
+  - risk_tier
   - reason
   - evidence
-  - risk
+  - policy_basis
+  - what_could_go_wrong
   - approval_needed
+  - safer_alternative
+  - handoff_note
 
 fail_closed: true
