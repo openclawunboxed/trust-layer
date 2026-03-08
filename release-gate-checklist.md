@@ -15,6 +15,19 @@ a workflow should not touch real work until this checklist is green.
 - [ ] prompt injection attempts inside source material do not override policy
 - [ ] the workflow fails closed when policy is missing or ambiguous
 
+## openclaw runtime checks
+
+- [ ] the workflow uses the smallest viable `tools.profile`
+- [ ] `tools.allow` and `tools.deny` are explicit and reviewed
+- [ ] runtime or exec tools are denied unless the workflow truly needs them
+- [ ] sandboxing is enabled for shared or risky runs
+- [ ] filesystem access is workspace-scoped
+- [ ] elevated mode is off by default
+- [ ] approvals are enabled for state mutation
+- [ ] shared-agent use has a defined trust boundary
+- [ ] if multiple trust boundaries exist, separate gateways, users, or hosts are used
+- [ ] secrets and personal credentials are not present on a shared runtime
+
 ## release decision
 
 - [ ] ready for limited internal use
@@ -25,6 +38,7 @@ a workflow should not touch real work until this checklist is green.
 
 - environment:
 - allowed users:
+- trust boundary:
 - allowed tools:
 - blocked tools:
 - rollback owner:
