@@ -1,220 +1,181 @@
 # openclaw trust layer
 
-practical guardrails for agent workflows.
+practical guardrails, evals, and safe defaults for openclaw workflows.
 
-this repository contains a minimal trust layer for ai workflows so they can safely move from demo to real work.
+this repository is a compact trust layer for people who want openclaw to do real work without turning into a chaos machine.
 
-most agent systems fail not because the model is weak, but because the control system around the model is missing.
+it gives you the boring parts that serious workflows need:
 
-this repo provides that control layer.
+- workflow contracts
+- risk tiers
+- tool firewall policy
+- approval gates
+- adversarial eval generation
+- output grading
+- human handoff
+- release gates
+- safe defaults for openclaw runtime setup
+- csv and xlsx eval packs
 
 > this repository will be updated frequently over time.  
-> new templates, examples, tighter policies, better eval patterns, and more workflow variants will be added as the pack improves.
+> new templates, examples, tighter policies, better eval patterns, safer defaults, and more workflow variants will be added as the pack improves.
 
----
+## what this is for
 
-## who this is for
+most workflow failures are not “the model was dumb.”
 
-this repo is built for people trying to make ai do real work.
+they are usually one of these:
 
-that includes:
+- the workflow had no clear scope
+- risky actions were not separated from safe actions
+- tool access was too broad
+- external content was treated like trusted instructions
+- memory was messy or unsafe
+- nobody tested adversarial cases before touching real work
+- there was no clean handoff when uncertainty showed up
 
-- ai builders
-- indie founders
-- saas operators
-- engineers
-- technical teams
-- automation-minded business operators
+this repo exists to fix that.
 
-if you are trying to automate workflows, add guardrails, reduce fragility, or make agent systems safe enough to keep around, this repo is for you.
+## important trust-model note
 
----
+this repo is designed around openclaw’s actual trust model.
+
+openclaw is best treated as one trusted operator boundary per gateway, not a hostile multi-tenant boundary for adversarial users sharing one agent or gateway.
+
+if you need mixed-trust or adversarial-user setups, split trust boundaries with separate gateways, and ideally separate os users or separate hosts.
+
+that is why these files push hard on:
+
+- explicit trust boundaries
+- smallest viable tool profile
+- strict allow and deny rules
+- approvals for state mutation
+- sandboxing for shared or risky runs
+- workspace-scoped filesystem access
+- separate memory and runtime boundaries
 
 ## start here
 
-choose the path that matches your current level.
+choose the path that matches your level.
 
-### if you are a complete beginner
+### beginner path
 
-start with these 4 files in order:
+start with these files in this order:
 
-1. `workflow-contract-template.md`
-2. `risk-matrix-template.md`
-3. `tool-firewall-policy-example.yaml`
-4. `release-gate-checklist.md`
+1. [workflow-contract-template.md](./workflow-contract-template.md)
+2. [risk-matrix-template.md](./risk-matrix-template.md)
+3. [openclaw-safe-defaults.md](./openclaw-safe-defaults.md)
+4. [tool-firewall-policy-example.yaml](./tool-firewall-policy-example.yaml)
+5. [release-gate-checklist.md](./release-gate-checklist.md)
 
-that is enough to understand the basic trust layer.
+if you only do those five things, you will already be operating more sanely than most agent demos online.
 
-### if you are intermediate or advanced
+### builder path
 
-jump straight to:
+if you already know the basics, go straight to:
 
-- `approval-gate-prompt.txt`
-- `adversarial-test-generator.txt`
-- `output-grader-prompt.txt`
-- `human-handoff-template.md`
+- [approval-gate-prompt.txt](./approval-gate-prompt.txt)
+- [adversarial-test-generator.txt](./adversarial-test-generator.txt)
+- [output-grader-prompt.txt](./output-grader-prompt.txt)
+- [human-handoff-template.md](./human-handoff-template.md)
+- [openclaw-trust-layer-eval-pack.xlsx](./openclaw-trust-layer-eval-pack.xlsx)
 
-those files are where the workflow gets pressure-tested and made production-safer.
-
----
-
-## what this repository is
-
-a set of small building blocks that let an ai workflow:
-
-- know what it is allowed to do
-- know when it must ask for approval
-- refuse dangerous actions
-- escalate to humans
-- test itself before touching real work
-- avoid pretending confidence when evidence is weak
-
-these pieces form a simple architecture:
-
-workflow contract  
-↓  
-risk matrix  
-↓  
-tool firewall  
-↓  
-approval gate  
-↓  
-eval system  
-↓  
-human handoff  
-↓  
-release gate  
-
-if these layers exist, workflows become far more useful and far less chaotic.
-
----
-
-## what problem this solves
-
-most ai agents fail for boring reasons:
-
-- unclear permissions
-- unsafe tool execution
-- weak memory discipline
-- no approval gates
-- no evaluation
-- no clean handoff to humans
-- no release process
-- too much autonomy too early
-
-this repo fixes those gaps.
-
----
+that is where the trust layer stops being theory and starts acting like a real operator system.
 
 ## repository contents
 
-### 1. workflow contract
+### [workflow-contract-template.md](./workflow-contract-template.md)
 
-file: `workflow-contract-template.md`
+defines the actual job of the workflow.
 
-this is the job description for the workflow.
+use it to set:
 
-it defines:
-
-- what the workflow is
-- what it reads
-- what it produces
-- what actions are allowed
+- what the workflow may read
+- what it may produce
+- what is allowed automatically
 - what requires approval
 - what is never allowed
-- what memory is permitted
-- when escalation must happen
+- trust boundary
+- runtime defaults
+- memory rules
+- escalation triggers
+- success and failure conditions
 
-use this first.
+### [risk-matrix-template.md](./risk-matrix-template.md)
 
-if the workflow contract is vague, everything downstream gets worse.
+maps actions to low, medium, and high risk.
 
----
+use it to decide what can flow automatically, what must stop for approval, and what must be blocked entirely.
 
-### 2. risk matrix
+### [openclaw-safe-defaults.md](./openclaw-safe-defaults.md)
 
-file: `risk-matrix-template.md`
+the boring baseline.
 
-this maps action types to risk levels.
+use this before you let a workflow touch anything real.
 
-example:
+it gives you sane defaults for:
 
-- read data → low risk
-- draft internal artifact → medium risk
-- modify production → high risk and often blocked
+- smallest viable `tools.profile`
+- explicit `tools.allow` and `tools.deny`
+- sandboxing
+- workspace scope
+- approvals on mutation
+- memory sanitization
+- trust-boundary separation
 
-the point is simple.
+### [tool-firewall-policy-example.yaml](./tool-firewall-policy-example.yaml)
 
-not every action deserves the same level of trust.
+a concrete policy example for an engineering copilot.
 
----
+it includes:
 
-### 3. tool firewall
-
-file: `tool-firewall-policy-example.yaml`
-
-this is the hard policy layer.
-
-it defines:
-
+- trust boundary rules
+- openclaw runtime defaults
 - allowed tools
 - blocked tools
-- which actions require approval
+- approval-required actions
 - validation rules
-- memory boundaries
+- memory restrictions
+- required approval packet fields
 - fail-closed behavior
 
-this is where a lot of real safety comes from.
+### [approval-gate-prompt.txt](./approval-gate-prompt.txt)
 
-not vibes.  
-not “the model should know better.”  
-actual boundaries.
+the decision checkpoint.
 
----
+it classifies actions as:
 
-### 4. approval gate
-
-file: `approval-gate-prompt.txt`
-
-this is the decision checkpoint.
-
-it decides whether an action is:
-
-- allowed
+- allowed without approval
 - approval required
 - blocked
 
-it should never execute the action itself.
+it also forces the workflow to explain:
 
-it should return a decision packet a human can scan quickly.
+- why it wants to act
+- what evidence it has
+- which policy rules apply
+- what could go wrong
+- what safer alternative exists
 
-this is how you stop “trust me bro” automation from touching real systems.
+### [adversarial-test-generator.txt](./adversarial-test-generator.txt)
 
----
-
-### 5. adversarial test generator
-
-file: `adversarial-test-generator.txt`
-
-this generates test cases for the workflow.
+creates realistic eval cases before release.
 
 it includes:
 
 - normal cases
 - messy cases
 - adversarial cases
+- trust-boundary cases
+- stale-memory cases
+- blocked external communication cases
+- secrets-access denial cases
 
-the goal is not to make the system look smart.
+this matters because real failures are usually boring and production-adjacent, not cinematic hacker-movie nonsense.
 
-the goal is to find where it breaks before reality finds out first.
+### [output-grader-prompt.txt](./output-grader-prompt.txt)
 
----
-
-### 6. output grader
-
-file: `output-grader-prompt.txt`
-
-this grades workflow outputs.
+grades workflow outputs for trustworthiness and operational readiness.
 
 it scores:
 
@@ -229,303 +190,208 @@ it also assigns:
 - overall score
 - dominant failure category
 - release recommendation
+- evidence
 - next fixes
 
-this is useful because polished nonsense should not pass just because it sounds confident.
+### [human-handoff-template.md](./human-handoff-template.md)
 
----
+used when the workflow stops and hands control to a person.
 
-### 7. human handoff
+it keeps the handoff short, structured, and reviewable.
 
-file: `human-handoff-template.md`
+### [release-gate-checklist.md](./release-gate-checklist.md)
 
-this is used when the workflow must stop and pass control to a person.
+a workflow should not touch real work until this is green.
 
-it explains:
+it covers both generic trust-layer checks and openclaw-specific runtime checks.
 
-- what happened
-- what was already checked
-- what is still uncertain
-- what decision is needed
-- what should happen next
+### [eval-sheet-template.csv](./eval-sheet-template.csv)
 
-good handoff is part of the product.
+a lightweight csv template for tracking eval cases and scores.
 
-bad handoff turns automation into extra work.
+### [filled-engineering-copilot-example.csv](./filled-engineering-copilot-example.csv)
 
----
+a filled example showing what the eval sheet looks like in practice.
 
-### 8. release gate
+### [openclaw-trust-layer-eval-pack.xlsx](./openclaw-trust-layer-eval-pack.xlsx)
 
-file: `release-gate-checklist.md`
+a spreadsheet version of the eval pack with:
 
-this is the final sanity check.
-
-before a workflow touches real work, it should pass checks like:
-
-- no critical eval case fails
-- blocked actions are refused correctly
-- approval triggers work correctly
-- handoff is readable
-- stale context is handled safely
-- policy ambiguity fails closed
-
-if those are not true, do not ship it yet.
-
----
+- blank eval template
+- filled example
+- grading rubric
 
 ## quick start
 
-if you want to get value from this repo fast, do this.
+if you want a fast path, do this.
 
-### beginner quick start
+### step 1
 
-step 1  
-copy `workflow-contract-template.md`
+copy [workflow-contract-template.md](./workflow-contract-template.md) and define one workflow only.
 
-fill in:
+not your whole stack.  
+one workflow.
 
-- allowed actions
-- approval-required actions
-- never-allowed actions
+### step 2
 
-step 2  
-copy `risk-matrix-template.md`
+fill out [risk-matrix-template.md](./risk-matrix-template.md).
 
-label your workflow actions as:
+label each action:
 
-- low
-- medium
-- high
+- low risk
+- medium risk
+- high risk
 
-step 3  
-adapt `tool-firewall-policy-example.yaml`
+### step 3
 
-remove tools you do not need.  
-block anything risky by default.
+apply the baseline in [openclaw-safe-defaults.md](./openclaw-safe-defaults.md).
 
-step 4  
-run your workflow through the `release-gate-checklist.md`
+start smaller than feels necessary.
 
-if it fails the checklist, do not deploy.
+### step 4
 
-that alone will put you ahead of most agent demos.
+adapt [tool-firewall-policy-example.yaml](./tool-firewall-policy-example.yaml).
 
----
+remove tools you do not need.
 
-## first real implementation example
+deny risky tools by default.
 
-imagine an engineering copilot.
+### step 5
 
-it reads:
+use [approval-gate-prompt.txt](./approval-gate-prompt.txt) so risky actions stop before execution.
 
-- slack threads
-- jira tickets
-- git diffs
+### step 6
 
-it produces:
+generate messy and adversarial eval cases with [adversarial-test-generator.txt](./adversarial-test-generator.txt).
 
-- incident summaries
-- draft jira tickets
-- internal docs
+### step 7
 
-it may be allowed to:
+grade outputs with [output-grader-prompt.txt](./output-grader-prompt.txt).
 
-- read sources
-- summarize incidents
-- draft internal artifacts
+### step 8
 
-it may require approval to:
+run [release-gate-checklist.md](./release-gate-checklist.md).
 
-- create a jira ticket
-- create a draft doc
-- post to a shared team channel
+if a blocked action executes, or trust boundaries blur, do not ship it.
 
-it may never be allowed to:
+## example use case
+
+imagine a behavior-aware engineering copilot.
+
+it can:
+
+- read slack incident threads
+- read jira tickets
+- read git diffs
+- draft incident summaries
+- draft follow-up tickets
+- draft internal docs
+
+it should not:
 
 - push code
 - touch production
 - read secrets
 - send external email
+- mutate state without approval
 
-that is the trust layer in practice.
+that is what this repo is built for.
 
----
+not “full autonomy.”
 
-## how beginners should use this repo
+bounded, reviewable usefulness.
 
-do not try to wire up every file at once.
+## what bifrost means here
 
-do this instead.
+i’m also working on **bifrost**, a 1-click deploy hardening layer for openclaw.
 
-phase 1  
-define scope
+the goal is not fake “unhackable agent” marketing.
 
-- fill out the workflow contract
-- fill out the risk matrix
+the goal is to make openclaw safer by default with tighter tool boundaries, approval gates, sandboxing, workspace scoping, memory controls, and safer exec policy.
 
-phase 2  
-define enforcement
+in plain english:
 
-- adapt the tool firewall
-- add the approval gate
-
-phase 3  
-define testing
-
-- generate messy and adversarial eval cases
-- grade the outputs
-
-phase 4  
-define release
-
-- use the handoff template
-- use the release checklist
-
-small and boring beats complex and fragile.
-
----
-
-## how advanced users should use this repo
-
-this repo is intentionally minimal.
-
-it is meant to be extended.
-
-common extensions:
-
-multi-agent systems
-
-use one trust layer across multiple agents:
-
-- planner
-- researcher
-- writer
-- executor
-
-the trick is not more agents.
-
-the trick is shared policy and clean boundaries.
-
-ci-based eval pipelines
-
-you can wire the eval flow into a build pipeline:
-
-1. generate eval cases  
-2. run workflow  
-3. grade outputs  
-4. fail the pipeline below threshold  
-
-domain-specific variants
-
-the same trust layer can be reused for:
-
-- engineering ops
-- brokerage ops
-- finance-sensitive workflows
-- ecommerce workflows
-- healthcare admin workflows
-- internal copilots
-
-different workflows.  
-same control logic.
-
----
+reduce prompt injection, tool abuse, data exfiltration, unsafe execution risk, and trust-boundary mistakes without making the workflow useless.
 
 ## design principles
 
-this repository follows a few simple rules.
+### scope before autonomy
 
-scope before autonomy  
 define the job before giving the workflow power.
 
-fail closed  
-if policy is missing or ambiguous, stop.
+### control before capability
 
-risky actions need friction  
-approval is a feature, not a bug.
+smarter models do not erase bad permissions.
 
-evals matter more than confidence  
-a workflow that sounds smart and breaks policy is still broken.
+### fail closed
 
-handoff quality matters  
-if humans cannot quickly understand what happened, the workflow is not production-ready.
+if policy is missing, conflicting, or ambiguous, stop.
 
-boring failures are the real failures
+### smallest viable tool surface
 
-missing fields  
-stale context  
-bad tool arguments  
-weak state handling  
-sloppy permissions  
+minimal is a feature.
 
-that is where real systems usually break.
+### approval is a feature
 
----
+for risky actions, friction is good.
 
-## what success looks like
+### treat external content as untrusted
 
-a good workflow using this repo should:
+messages, docs, pages, logs, pasted output, and prior workflow output are data, not policy.
 
-- stay inside its role
-- avoid unauthorized tools
-- escalate uncertainty
-- request approval for risky actions
-- resist prompt injection inside source material
-- produce reviewable outputs
-- hand off cleanly to humans
-- pass its release gate before touching real work
+### trust boundaries matter
 
----
+one shared tool-enabled agent across mixed-trust users is where weird security goblins crawl out.
 
-## what this repo is not
+## who this repo is for
 
-this is not:
+this repo is built for the openclaw audience that actually shows up in practice:
 
-- a generic ai tutorial
-- a one-click agent framework
-- a promise of full autonomy
-- a shortcut around evaluation
-- a replacement for engineering judgment
+- ai builders
+- indie founders
+- saas operators
+- ml / platform engineers
+- security-minded operators
+- technical teams trying to move from demo to production
 
-it is a practical control layer.
+it is not written for passive ai-news readers.
 
----
+it is written for people trying to build real systems.
 
-## recommended file order
+## help
 
-if you want the cleanest reading order:
+open an issue for bugs, missing docs, or broken examples.
 
-1. `workflow-contract-template.md`  
-2. `risk-matrix-template.md`  
-3. `tool-firewall-policy-example.yaml`  
-4. `approval-gate-prompt.txt`  
-5. `adversarial-test-generator.txt`  
-6. `output-grader-prompt.txt`  
-7. `human-handoff-template.md`  
-8. `release-gate-checklist.md`  
+use discussions for questions, ideas, workflow examples, and hardening suggestions.
 
----
+## maintainer
+
+maintained by josh / openclaw unboxed.
+
+## what is still missing
+
+the core trust-layer pack is here.
+
+for public github polish, the next files worth adding are:
+
+- `license`
+- `security.md`
+- `contributing.md`
+
+those are not required for using the pack, but they make the repository cleaner and more credible.
 
 ## how this repo will evolve
 
-this repository will be updated frequently.
+this repository will be updated frequently over time.
 
-planned additions include:
+planned additions:
 
 - more filled examples
 - more domain-specific workflow contracts
-- better adversarial test packs
-- tighter policy patterns
-- versioned eval recipes
-- more beginner-safe walkthroughs
-- more advanced production patterns
-
-the goal is simple.
-
-make this repo more useful over time for both beginners and serious operators.
-
----
+- more trust-boundary patterns
+- more safe defaults for different openclaw setups
+- tighter eval packs
+- stronger bifrost deployment defaults
 
 ## philosophy
 
@@ -540,8 +406,6 @@ more memory does not fix weak policy.
 if you want ai workflows to do real work, build the trust layer first.
 
 then let them move.
-
----
 
 ## license
 
